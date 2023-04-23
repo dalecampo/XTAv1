@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>XTA Converter</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+  </head>
+  <body>
+    <img src="https://i.imgur.com/EZh7bxy.png">
+    <form>
+      <div>
+        <input type="file" id="xml-file" name="xml-file" accept=".xml" required>
+        <label for="xml-file" id="xml-upload-label">Upload XML</label>
+      </div>
+      <div>
+        <label for="bin-name">Segments Bin:</label>
+        <input type="text" id="bin-name" name="bin-name" value="00_Final Segments">
+      </div>
+      <button type="button" id="convert-btn">Convert XML to CSV</button>
+      <div id="downloaded-text" class="hidden"></div>
+    </form>
+    <div class="hidden" id="error"></div>
+    <div class="hidden" id="output"></div>
+    <script>
+      const xmlUpload = document.getElementById("xml-file");
+      const uploadLabel = document.getElementById("xml-upload-label");
+
+      xmlUpload.addEventListener("change", () => {
+        const files = xmlUpload.files;
+        if (files.length > 0) {
+          const fileName = files[0].name;
+          uploadLabel.textContent = fileName;
+        }
+      });
+    </script>
+    <script src="Convert.js"></script>
+  </body>
+</html>

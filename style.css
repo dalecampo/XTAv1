@@ -1,0 +1,139 @@
+html {
+    background: linear-gradient(to bottom, #00122e, #000814);
+    min-height: 100vh;
+  }
+  
+  body {
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 700;
+    font-size: 1.2rem;
+    color: white;
+    line-height: 3rem; /* set the line height to 1.5 times the font size */
+  }
+  
+  /* style the header */
+  h1 {
+    text-align: center;
+    font-size: 3rem;
+    margin-top: 2rem;
+  }
+  
+  form {
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* align the form items to the left */
+    margin-top: 2rem;
+    margin-left: auto; /* set the left margin to auto */
+    margin-right: auto; /* set the right margin to auto */
+    max-width: 450px;
+  }
+  
+  label {
+    font-size: 1.25rem;
+    margin-bottom: 1rem;
+  }
+
+  /* Upload XML Button */
+  label[for="xml-file"] {
+    display: center;
+    margin-top: 0.6rem;
+    margin-bottom: 1rem;
+    margin-left: auto;
+    margin-right: auto;
+    padding: 0.4rem 1rem;
+    border-radius: 0.5rem;
+    border: 2px solid #26b54c;
+    background-color: white;
+    color: #26b54c;
+    font-size: 1.25rem;
+    font-family: 'Montserrat';
+    font-weight: 700;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+
+  label[for="xml-file"]:hover {
+    background-color: #26b54c;
+    color: white;
+  }
+  
+  img {
+    max-width: 500px;
+    display: block;
+    margin: auto;
+  }
+  
+  input[type="text"] {
+    padding: 0.5rem;
+    border-radius: 0.5rem;
+    border: none;
+    margin-top: 0.6rem;
+    margin-bottom: 1rem;
+    margin-left: 0.5rem;
+    font-family: Montserrat;
+    color: #00122e;
+    font-size: 1rem;
+  }
+
+  #convert-btn {
+    padding: 0.4rem 1rem;
+    border-radius: 0.5rem;
+    border: 2px white;
+    background: linear-gradient(to right, #26b54c, #00a3fb);
+    color: white;
+    font-family: 'Montserrat';
+    font-weight: 700;
+    font-size: 1.2rem;
+    cursor: pointer;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  #downloaded-text {
+    padding: 0.5rem;
+    font-family: Montserrat;
+    color: #00A3FB;
+    font-size: 1rem;
+    font-weight: 500;
+  }
+  
+  /* This is the default file upload that I'm trying to hide */
+  input[type="file"] {
+    display: none;
+  }
+  
+  /* style the error and output messages */
+  .hidden {
+    display: none;
+  }
+  
+  #error, #output {
+    margin-top: 2rem;
+    padding: 1rem;
+    border-radius: 0.5rem;
+    font-size: 1.2rem;
+    line-height: 1.5; /* match the line height to the body element */
+  }
+  
+  #error {
+    background-color: #26b54c;
+    color: white;
+    font-family: 'Montserrat';
+    font-weight: 700;
+    font-size: 1.2rem;
+    padding: 0.4rem 1rem;
+    border-radius: 0.5rem;
+    margin-top: 2rem;
+    text-align: center;
+  }
+  
+  #output {
+    color: #00457A;
+    font-family: 'Montserrat';
+    font-weight: 400;
+    font-size: 1.2rem;
+    padding: 0.4rem 1rem;
+    border-radius: 0.5rem;
+    margin-top: 5rem;
+    text-align: center;
+  }
