@@ -1,6 +1,5 @@
 var wrongSegmentBinName = false;
 
-
 function parseXML(xmlData, targetBinName) {
     wrongSegmentBinName = false;
     downloadedText.innerHTML = "Downloaded!";
