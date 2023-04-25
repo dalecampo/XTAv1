@@ -1,4 +1,4 @@
-import { track, provider, category } from "./sheets.js";
+import { track, provider, category } from "sheets.js";
 
 var wrongSegmentBinName = false;
 
