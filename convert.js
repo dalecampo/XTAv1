@@ -1,3 +1,5 @@
+import { track, provider, category } from "./sheets.js";
+
 var wrongSegmentBinName = false;
 
 function parseXML(xmlData, targetBinName) {
@@ -101,7 +103,9 @@ function parseXML(xmlData, targetBinName) {
                 continue; // skip clips with no name
             }
             const clipName = clipNameElement.textContent;
-            const clipURL = "";
+            const clipProvider = provider(clipName)
+            const clipCategory = category(clipName, clipProvider)
+            const clipURL = track(clipName, clipProvider, clipCategory);
     
             // Check if the audio file name is the same as the clip name
             if (audioFileName === clipName) {
