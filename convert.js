@@ -1,223 +1,312 @@
-import { track, provider, category } from "sheets.js";
+import { track, provider, category, needsClipId } from "./sheets.js";
 
-var wrongSegmentBinName = false;
+//
+const downloadedText = document.getElementById("downloaded-text");
+var correctSegmentBinName = true;
+var foundSegmentsInBin = true;
+var channelSelected = false;
 
-function parseXML(xmlData, targetBinName) {
-    wrongSegmentBinName = false;
-    downloadedText.innerHTML = "Downloaded!";
+// PARSE THE XML FILE AND REFORMAT ROWS ARRAY
+
+function parseXML(xmlData, userBinName) {
+    correctSegmentBinName = true;
+    foundSegmentsInBin = true;
+    channelSelected = true;
+
     const parser = new DOMParser();
-    const xmlDoc = parser.parseFromString(xmlData, "text/xml");
-  
-    console.log(`xmlDoc: ${xmlDoc.documentElement.outerHTML}`); // Debugging statement
-  
+    const xmlDoc = parser.parseFromString(xmlData, "text/xml");  
     const projectElement = xmlDoc.querySelector("project");
-  
-    console.log(`projectElement: ${projectElement}`); // Debugging statement
-  
     const childrenElements = projectElement.getElementsByTagName("children");
-  
-    console.log(`childrenElements: ${childrenElements.length}`); // Debugging statement
-  
-    let parentElement;
-    for (let i = 0; i < childrenElements.length; i++) {
-      const bins = childrenElements[i].getElementsByTagName("bin");
-      const nameTags = childrenElements[i].getElementsByTagName("name");
-      for (let j = 0; j < bins.length; j++) {
-        if (nameTags[j].textContent.trim() === targetBinName) {
-          parentElement = bins[j];
-          break;
-        }
-      }
-      if (parentElement) {
-        break;
-      }
+    let SegmentsBinElement;
+    
+    // Find the <bin> element whose name matches userNameBin and assign it to SegmentsBinElement.
+    const bins = xmlDoc.getElementsByTagName("bin");
+    SegmentsBinElement = Array.from(bins).find((bin) => {
+      const nameTag = bin.getElementsByTagName("name")[0];
+      return nameTag && nameTag.textContent.trim() === userBinName;
+    });
+
+    // If the user's Segments Bin Name does not match a bin name in their XML, exit parseXML.
+    if (!SegmentsBinElement) {
+      correctSegmentBinName = false;
+      return [];
     }
-  
-    if (!parentElement) {
-      console.log(`No matching bin found with name '${targetBinName}'`);
-      wrongSegmentBinName = true;
-      downloadedText.innerHTML = "Segments Bin Name Not Found";
+
+    // If the user has not changed the default Channel dropdown, exit parseXML.
+    if (document.getElementById("channel-dropdown").value === "Select Channel") {
+      channelSelected = false;
       return [];
     }
   
-    const sequences = parentElement.getElementsByTagName("sequence");
-  
-    console.log(`sequences: ${sequences}`); // Debugging statement
-  
-    let csvData = [["Sequence Name", "Compilation Name", "Clip Name", "Clip URL", "Audio File Name"]];
-  
-    // Loop through each sequence
-    for (let i = 0; i < sequences.length; i++) {
-      const sequence = sequences[i];
-      const nameElement = sequence.getElementsByTagName("name")[0];
-      if (!nameElement) {
-        console.log(`Skipping sequence ${i + 1} because it has no name`);
-        continue; // skip sequences with no name
+    // Create the rows array.
+    const rows = [];
+
+    // Find all sequence elements in SegmentsBinElement and assign to segments variable.
+    //const segments = SegmentsBinElement.getElementsByTagName("sequence");
+    
+    const childrenElement = SegmentsBinElement.getElementsByTagName("children")[0];
+    const segments = [];
+
+    // Add all sequence elements nested in SegmentsBinElement to segments array.
+    if (!childrenElement) {
+      foundSegmentsInBin = false;
+      return [];
+    } else {    
+      for (let i = 0; i < childrenElement.children.length; i++) {
+        const childNode = childrenElement.children[i];    
+        if (childNode.tagName === "sequence") {
+          segments.push(childNode);
+        }
       }
-      const sequenceName = nameElement.textContent;
-  
-      console.log(`Found sequence ${sequenceName}`);
-  
-      // Loop through each compilation in the sequence
-      const compilations = sequence.getElementsByTagName("sequence");
-      for (let j = 0; j < compilations.length; j++) {
-        const compilation = compilations[j];
-        const compilationNameElement = compilation.getElementsByTagName("name")[0];
-        if (!compilationNameElement) {
-          console.log(`Skipping compilation ${j + 1} because it has no name`);
-          continue; // skip compilations with no name
-        }
-        const compilationName = compilationNameElement.textContent;
-        const videoTracks = compilation.getElementsByTagName("clipitem");
-  
-        if (videoTracks.length === 0) {
-          continue; // skip compilations with no video files
-        }
-  
-        console.log(`Found compilation ${compilationName}`);
-  
-        // Get the audio file name for the compilation
-          const audioElement = compilation.getElementsByTagName("audio")[0];
-          if (!audioElement) {
-          console.log(`Skipping compilation ${compilationName} because it has no audio`);
-          continue; // skip compilations with no audio
-          }
-          const audioTrack = audioElement.getElementsByTagName("clipitem")[0];
-          if (!audioTrack) {
-          console.log(`Skipping compilation ${compilationName} because it has no audio clipitem`);
-          continue; // skip compilations with no audio clipitem
-          }
-          const audioFileNameElement = audioTrack.getElementsByTagName("name")[0];
-          if (!audioFileNameElement) {
-          console.log(`Skipping compilation ${compilationName} because it has no audio file name`);
-          continue; // skip compilations with no audio file name
-          }
-          const audioFileName = audioFileNameElement.textContent;
-  
-          // Loop through each video file in the compilation
-          for (let k = 0; k < videoTracks.length; k++) {
-            const videoTrack = videoTracks[k];
-            const clipNameElement = videoTrack.getElementsByTagName("name")[0];
-            if (!clipNameElement) {
-                console.log(`Skipping clip ${k + 1} because it has no name`);
-                continue; // skip clips with no name
-            }
-            const clipName = clipNameElement.textContent;
-            const clipProvider = provider(clipName)
-            const clipCategory = category(clipName, clipProvider)
-            const clipURL = track(clipName, clipProvider, clipCategory);
-    
-            // Check if the audio file name is the same as the clip name
-            if (audioFileName === clipName) {
-                console.log(`Skipping row because Audio File Name and Clip Name are the same: ${[sequenceName, compilationName, clipName, clipURL, audioFileName]}`);
-                continue;
-            }
-    
-            csvData.push([sequenceName, compilationName, clipName, clipURL, audioFileName]);
-          }
     }
-    }
-    // Sort csvData array by segment name (alphabetical order)
-    csvData.sort((a, b) => {
+
+    // SEGMENT ----------
+
+    // Loop through each segment's sequence element
+    for (let i = 0; i < segments.length; i++) {
+      const segment = segments[i];
+      const segmentNameElement = segment.getElementsByTagName("name")[0];
+      
+      if (!segmentNameElement) {
+        //console.log(`Skipping segment ${i + 1} because it has no name.`);
+        continue; // skip segments with no name
+      }
+
+      const segmentName = segmentNameElement.textContent;
+      console.log("");
+      console.log('%cSEGMENT %d: %s', 'font-weight: bold;', i + 1, segmentName);
+
+      // Find all sequence elements ("comp" elements) in the segment and assign to comps variable
+      const comps = segment.getElementsByTagName("sequence");
+
+      // COMP ----------
+
+      // Loop through each comp in the segment
+      for (let j = 0; j < comps.length; j++) {
+        const comp = comps[j];
+        const compNameElement = comp.getElementsByTagName("name")[0];
+
+        if (!compNameElement) {
+          //console.log(`Skipping comp ${j + 1} because it has no name.`);
+          continue; // skip comps with no name
+        }
+
+        const compName = compNameElement.textContent;
+        console.log("");
+        console.log(`COMP: ${compName}`);
+        
+        // Store all video and audio elements in clipItemElements.
+        const clipItemElements = Array.from(comp.getElementsByTagName("clipitem"));
+
+        // Store video elements in videoElements.
+        const videoElements = clipItemElements.filter(videoElement => {
+          const videoMediaElement = videoElement.getElementsByTagName("media")[0];
+          if (videoMediaElement) {
+            return videoMediaElement.getElementsByTagName("video").length > 0;
+          }
+          return false;
+        });
+        //console.log(`Found ${videoElements.length} video elements in ${compName}`);
+
+        // Skip comps with no video files.
+        if (videoElements.length === 0) {
+          continue;
+        }   
+
+        // AUDIO ---------- modify it to focus on the longest audio file
+
+        // Store audio elements in audioElements.
+        const audioElements = clipItemElements.filter(audioElement => {
+          const audioMediaElement = audioElement.getElementsByTagName("media")[0];
+          if (audioMediaElement) {
+            return audioMediaElement.getElementsByTagName("audio").length > 0;
+          }
+          return false;
+        });
+
+        let longestDuration = 0;
+        let audioFileName = ''; // Changed variable name from longestAudioFileName to audioFileName
+
+        // Iterate through each audio element and find the longest one.
+        for (let k = 0; k < audioElements.length; k++) {
+          const audioElement = audioElements[k];
+          const durationElement = audioElement.getElementsByTagName("duration")[0];
+
+          if (!durationElement) {
+            continue; // skip audio elements without a duration
+          }
+
+          const duration = parseFloat(durationElement.textContent);
+
+          // Update longestDuration and audioFileName if the current duration is greater.
+          if (duration > longestDuration) {
+            longestDuration = duration;
+            const nameElement = audioElement.getElementsByTagName("file")[0]?.getElementsByTagName("name")[0];
+            audioFileName = nameElement ? nameElement.textContent : '';
+          }
+        }
+
+        console.log("Audio File:");
+        console.log(audioFileName);
+        console.log("Video Files:");
+
+        // VIDEOS & REMAINING INFO ----------
+
+        // Keep track of which clip names were already used in this comp
+        const processedClipNames = [];
+
+        // Loop through each video file in the comp. Create one row per video file.
+        for (let k = 0; k < videoElements.length; k++) {
+          const videoElement = videoElements[k];
+          const clipNameElement = videoElement.getElementsByTagName("name")[0];
+
+          if (!clipNameElement) {
+            console.log(`Skipping clip ${k + 1} because it has no name`);
+            continue; // skip clips with no name
+          }
+          
+          const clipName = clipNameElement.textContent;
+
+          // Rows with these file names should be skipped in tracking.
+          const skipValues = [
+            "ATM Bug (Right).png",
+            "ATM Bug (Left).png",
+            "Attribution"
+          ];
+
+          // Get the file name from the <track><clipitem><file><name> value
+          const fileNameElement = videoElement.getElementsByTagName("file")[0]?.getElementsByTagName("name")[0];
+          const fileName = fileNameElement ? fileNameElement.textContent : '';
+
+          // SKIP THIS ROW IF ITS FILE NAME...
+          // ...contains any string from the skipValues list.
+          if (skipValues.some(skipValue => fileName.includes(skipValue))) {
+            console.log(`Skipping ${fileName}`);
+            continue;
+          }
+          // ...matches its audioFileName (This prevents duplicate rows in a comp's tracking).
+          if (audioFileName === clipName) {
+            console.log("Skipping row because Audio File Name and Clip Name are the same.");
+            continue;
+          }
+          // ...was already tracked in this comp.
+          if (processedClipNames.includes(clipName)) {
+            console.log(`Skipping ${clipName} (already tracked in ${compName}).`);
+            continue;
+          }
+
+          // Add the clipName value to the list of processed clip names for the current comp
+          processedClipNames.push(clipName);
+          console.log(clipName);
+
+          // CELLS IN THIS ROW ----------
+          
+          // Channel
+          const channel = document.getElementById("channel-dropdown").value;
+          // Provider
+          let clipProvider = null;
+          clipProvider = provider(clipName)          
+          // Clip ID
+          let clipId = null;
+          clipId = needsClipId(clipProvider);
+          // Category
+          let clipCategory = null;
+          clipCategory = category(clipName, clipProvider)
+          // Clip URL
+          const clipURL = track(clipName, clipProvider, clipCategory);
+          // Date cell (reformatted from "yyyy-mm-dd" to "mm/dd/yyyy")
+          const rawDate = document.getElementById("date").value;
+          const dateObj = new Date(rawDate);
+          const date = (dateObj.getMonth() + 1) + '/' + dateObj.getDate() + '/' + dateObj.getFullYear();       
+
+          // CREATE A NEW ROW FOR THIS CLIPNAME
+          const newRow = [
+            `"${segmentName}"`,
+            `"${compName}"`,
+            `"${clipName}"`,
+            `"${clipURL}"`,
+            `"${audioFileName}"`,
+            channel,
+            clipId,
+            clipProvider,
+            clipCategory,
+            date
+          ];
+
+          // ADD ^THIS ROW^ TO THE ROWS ARRAY
+          rows.push(newRow);
+        }
+      }
+
+      // SORT ROWS BY SEGMENT NAME (A->Z)
+      rows.sort((a, b) => {
         const segmentA = a[0];
         const segmentB = b[0];
-        if (segmentA === "Sequence Name") {
-          return -1; // Keep header row at top
-        } else if (segmentB === "Sequence Name") {
-          return 1; // Move header row to top
-        } else {
+        if (segmentA && segmentB) {
           return segmentA.localeCompare(segmentB);
         }
+        return 0;
       });
-    
-    return csvData;
+    }
+  const headerRow = ["Segment Name", "Comp Name", "Clip Name", "Clip URL", "Audio File Name", "Channel", "Clip ID", "Provider", "Category", "Date"];
+  rows.unshift(headerRow);
+  console.log(rows);
+  return rows;
+}
+  
+// When the user clicks Convert XML to CSV, execute Convert().
+const convertBtn = document.getElementById("convert-btn");
+convertBtn.addEventListener("click", Convert);
+
+// CONVERT XML TO CSV ----------
+
+function Convert() {
+  const xmlFile = document.getElementById("xml-file").files[0];
+  const userBinName = document.getElementById("bin-name").value;
+  
+  // Show an error if the user did not upload an XML file.
+  if (!xmlFile) {
+    downloadedText.innerHTML = "Upload an XML File";
+    return;
   }
 
-/**
- * Converts an XML file to CSV format and offers the resulting file for download.
- * @param {File} xmlFile - The XML file to convert to CSV format.
- * @param {string} targetBinName - The name of the XML element containing the data to convert.
- */
-function convertXMLToCSV(xmlFile, targetBinName) {
-    // Parse the XML data into an array of arrays representing the CSV data
-    console.log("parseXML() was called")
-    const csvData = parseXML(xmlFile, targetBinName);
-  
-    // Construct a filename for the CSV file by replacing the input file's extension with .csv
+  // Use a FileReader object to read the contents of the XML file as text
+  const reader = new FileReader();
+  reader.onload = function(event) {
+    const xmlData = event.target.result;
+    const csvData = parseXML(xmlData, userBinName);
+
+    // Construct a filename for the CSV file by replacing the input file's extension with .csv.
     const fileName = xmlFile.name.replace(/\.[^/.]+$/, "") + ".csv";
-  
-    // Convert the CSV data to a string with rows separated by commas and columns separated by newlines
+
+    // Convert the CSV data to a string with rows separated by commas and columns separated by newlines.
     const csvContent = "data:text/csv;charset=utf-8," + csvData.map(row => row.join(",")).join("\n");
-  
-    // Encode the CSV content for use in a hyperlink
+
+    // Encode the CSV content for use in a hyperlink.
     const encodedUri = encodeURI(csvContent);
-  
+
     // Create a new link element to simulate a download of the CSV file
     const link = document.createElement("a");
     link.setAttribute("href", encodedUri);
     link.setAttribute("download", fileName);
-  
-    // Append the link to the document body and simulate a click to trigger the download
-    document.body.appendChild(link); // Required for Firefox
-    link.click();
-    document.body.removeChild(link);
-  }
-  
-  const convertBtn = document.getElementById("convert-btn");
-  convertBtn.addEventListener("click", Convert);
-  
-  function Convert() {
-    const xmlFile = document.getElementById("xml-file").files[0];
-    console.log(xmlFile);
-    if (!xmlFile) {
-      alert("Please upload an XML file.");
+
+    // If the user selected a viable Segments Bin and Channel, download the file.
+    if (correctSegmentBinName === true && channelSelected === true) {
+      // Append the link to the document body and simulate a click to trigger the download
+      document.body.appendChild(link); // Required for Firefox
+      link.click();
+      document.body.removeChild(link);
+      downloadedText.innerHTML = "Downloaded!";
+    } else if (correctSegmentBinName === false) {
+      downloadedText.innerHTML = `'${userBinName}' Not Found`;
+      return;
+    } else if (foundSegmentsInBin === false) {
+      downloadedText.innerHTML = `${userBinName} Has No Sequences`;
+      return;
+    } else if (channelSelected === false) {
+      downloadedText.innerHTML = "Select a Channel";
       return;
     }
-  
-    const targetBinName = document.getElementById("bin-name").value;
-  
-    // Use a FileReader object to read the contents of the XML file as text
-    const reader = new FileReader();
-    reader.onload = function(event) {
-      const xmlData = event.target.result;
-      console.log(`xmlData: ${xmlData}`); // Debugging statement
-  
-      // Call the parseXML function with the XML data
-      const csvData = parseXML(xmlData, targetBinName);
-  
-      // Construct a filename for the CSV file by replacing the input file's extension with .csv
-      const fileName = xmlFile.name.replace(/\.[^/.]+$/, "") + ".csv";
-  
-      // Convert the CSV data to a string with rows separated by commas and columns separated by newlines
-      const csvContent = "data:text/csv;charset=utf-8," + csvData.map(row => row.join(",")).join("\n");
-  
-      // Encode the CSV content for use in a hyperlink
-      const encodedUri = encodeURI(csvContent);
-  
-      // Create a new link element to simulate a download of the CSV file
-      const link = document.createElement("a");
-      link.setAttribute("href", encodedUri);
-      link.setAttribute("download", fileName);
-  
-      if (wrongSegmentBinName === false) {
-        // Append the link to the document body and simulate a click to trigger the download
-        document.body.appendChild(link); // Required for Firefox
-        link.click();
-        document.body.removeChild(link);
-      } else {
-        downloadedText.innerHTML = "Segments Bin Name Not Found";
-        return;
-      }
-    }
-    reader.readAsText(xmlFile);
   }
-
-const convertXmlToCsvBtn = document.getElementById("convert-btn");
-const downloadedText = document.getElementById("downloaded-text");
-
-convertXmlToCsvBtn.addEventListener("click", () => {
-  const xml = document.getElementById("xml-file").files[0];
-  const binName = document.getElementById("bin-name").value;
-
-  downloadedText.classList.remove("hidden");
-});
+  reader.readAsText(xmlFile);
+}
