@@ -5,6 +5,9 @@ export function track(filename, provider, category) {
   if (provider === "Waiting..." || category === "Waiting...") {
     return "Waiting for info...";
   }
+  if (provider === "SELECT MANUALLY" || category === "SELECT PROVIDER") {
+    return "ADD CLIP URL MANUALLY";
+  }
   
   // Check if the provider is ArtGrid
   if (provider === "Artgrid") {
@@ -105,24 +108,24 @@ export function track(filename, provider, category) {
 
 
 
-
-
-
-
-
-
-
-
-
-
-
 //START OF PROVIDER()
 
 export function provider(filename) {
   if (filename == "") {
     return "Waiting...";
   }
-  if (filename.slice(-6) == "IG.mp4" || filename.slice(-6) == "YT.mp4" || filename.slice(-6) == "VI.mp4" || filename.slice(-6) == "TT.mp4") {
+  if (filename.slice(-6) == "YT.mp4") {
+    let contributor = username(filename);
+
+    if (contributor === "NASA") {
+      return "NASA";
+    } else if (contributor === "FailArmy" || contributor === "Jukin" || contributor === "People Are Awesome" || contributor === "The Pet Collective" ) {
+      return "Jukin (comp)"
+    } else {
+      return "Contributor Content";
+    }
+  }
+  if (filename.slice(-6) == "IG.mp4" || filename.slice(-6) == "TT.mp4" || filename.slice(-6) == "VI.mp4") {
     return "Contributor Content";
   }
   if (filename.slice(0, 3) == "AFV") {
@@ -168,19 +171,6 @@ export function provider(filename) {
 }
 
 //END OF PROVIDER()
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -274,100 +264,159 @@ export function category(filename, provider) {
 
 //END OF CATEGORY()
 
+
+
+
+
+
+
+
+
+
+//START OF CLIPID
+
+export function needsClipId(provider) {
+  if (provider === "Red Bull") {
+    return "ADD CLIP ID";
+  }
+}
+
+//END OF CLIP ID
+
+
+
+
+
+
+
+
+
+
+//START OF USERNAME
+
+function username(filename) {
+  const regex = /\((.*?)\)/; // create regex to match text between parentheses
+  const match = filename.match(regex); // find first match of regex in filename
+  if (match) {
+    return match[1]; // return text between parentheses
+  }
+  return null; // return null if no match is found
+}
+
+//END OF USERNAME
+
+
+
+
+
+
+
+
+
+
+/*
+
 //START OF TESTING - CONSTANTS DECLARATION
 
-const artgrid = "42674_waves_rush_to_rocky_shore_with_green_grass_and_fence_on_stormy_day_by_Jakob_Owens_Artgrid-HD_H264-HD.mp4"
-const artlist = "599442_Tornado, Road, Wind, Air_By_Ira_Belsky_Artlist_HD"
-const contentbible = "Game of thrones fan builds a Covid Castle in his house_m179365_ContentBible.mov"
-const instagram = "(louddoodle)_Ce66txEuTmW - 1_IG.mp4"
-const newsflare = "Newsflare-313848-french-bulldog-puppy-dressed-i.mp4"
-const pexels = "pexels-los-muertos-crew-8478021.mp4"
-const storyblocks = "close-up-on-sweet-macaroons-on-pink-background-delicious-desserts-SBV-332071933-HD.mov"
-const tiktok = "(stephcoach1234)_7127984644422700293_TT.mp4"
-const vimeo = "(OceanShutter)_Stay With Us - Part II - Stay Longer_212783769_VI.mp4"
-const youtube = "(I Cook And Paint)_Super Soft & Fluffy Cinnamon Rolls Recipe_k8x_s98P4xY_YT.mp4"
+const artgrid = "42674_waves_rush_to_rocky_shore_with_green_grass_and_fence_on_stormy_day_by_Jakob_Owens_Artgrid-HD_H264-HD.mp4";
+const artlist = "599442_Tornado, Road, Wind, Air_By_Ira_Belsky_Artlist_HD";
+const contentbible = "Game of thrones fan builds a Covid Castle in his house_m179365_ContentBible.mov";
+const instagram = "(louddoodle)_Ce66txEuTmW - 1_IG.mp4";
+const newsflare = "Newsflare-313848-french-bulldog-puppy-dressed-i.mp4";
+const pexels = "pexels-los-muertos-crew-8478021.mp4";
+const storyblocks = "close-up-on-sweet-macaroons-on-pink-background-delicious-desserts-SBV-332071933-HD.mov";
+const tiktok = "(stephcoach1234)_7127984644422700293_TT.mp4";
+const vimeo = "(OceanShutter)_Stay With Us - Part II - Stay Longer_212783769_VI.mp4";
+const youtube = "(I Cook And Paint)_Super Soft & Fluffy Cinnamon Rolls Recipe_k8x_s98P4xY_YT.mp4";
 
 //PROVIDER TESTS
-console.log("PROVIDER TESTS")
+console.log("");
+console.log("PROVIDER TESTS");
 
-const artgridProvider = provider(artgrid)
-const artlistProvider = provider(artlist)
-const contentbibleProvider = provider(contentbible)
-const instagramProvider = provider(instagram)
-const newsflareProvider = provider(newsflare)
-const pexelsProvider = provider(pexels)
-const storyblocksProvider = provider(storyblocks)
-const tiktokProvider = provider(tiktok)
-const vimeoProvider = provider(vimeo)
-const youtubeProvider = provider(youtube)
+const artgridProvider = provider(artgrid);
+const artlistProvider = provider(artlist);
+const contentbibleProvider = provider(contentbible);
+const instagramProvider = provider(instagram);
+const newsflareProvider = provider(newsflare);
+const pexelsProvider = provider(pexels);
+const storyblocksProvider = provider(storyblocks);
+const tiktokProvider = provider(tiktok);
+const vimeoProvider = provider(vimeo);
+const youtubeProvider = provider(youtube);
 
-console.log("artgridProvider: ",artgridProvider)
-console.log("artlistProvider: ",artlistProvider)
-console.log("contentbibleProvider: ",contentbibleProvider)
-console.log("instagramProvider: ",instagramProvider)
-console.log("newsflareProvider: ",newsflareProvider)
-console.log("pexelsProvider: ",pexelsProvider)
-console.log("storyblocksProvider: ",storyblocksProvider)
-console.log("tiktokProvider: ",tiktokProvider)
-console.log("vimeoProvider: ",vimeoProvider)
-console.log("youtubeProvider: ",youtubeProvider)
+console.log("artgridProvider: ",artgridProvider);
+console.log("artlistProvider: ",artlistProvider);
+console.log("contentbibleProvider: ",contentbibleProvider);
+console.log("instagramProvider: ",instagramProvider);
+console.log("newsflareProvider: ",newsflareProvider);
+console.log("pexelsProvider: ",pexelsProvider);
+console.log("storyblocksProvider: ",storyblocksProvider);
+console.log("tiktokProvider: ",tiktokProvider);
+console.log("vimeoProvider: ",vimeoProvider);
+console.log("youtubeProvider: ",youtubeProvider);
 
-console.log("")
+console.log("");
 
 //CATEGORY TESTS
-console.log("CATEGORY TESTS")
+console.log("CATEGORY TESTS");
 
-const artgridCategory = category(artgrid, artgridProvider)
-const artlistCategory = category(artlist, artlistProvider)
-const contentbibleCategory = category(contentbible, contentbibleProvider)
-const instagramCategory = category(instagram, instagramProvider)
-const newsflareCategory = category(newsflare, newsflareProvider)
-const pexelsCategory = category(pexels, pexelsProvider)
-const storyblocksCategory = category(storyblocks, storyblocksProvider)
-const tiktokCategory = category(tiktok, tiktokProvider)
-const vimeoCategory = category(vimeo, vimeoProvider)
-const youtubeCategory = category(youtube, youtubeProvider)
+const artgridCategory = category(artgrid, artgridProvider);
+const artlistCategory = category(artlist, artlistProvider);
+const contentbibleCategory = category(contentbible, contentbibleProvider);
+const instagramCategory = category(instagram, instagramProvider);
+const newsflareCategory = category(newsflare, newsflareProvider);
+const pexelsCategory = category(pexels, pexelsProvider);
+const storyblocksCategory = category(storyblocks, storyblocksProvider);
+const tiktokCategory = category(tiktok, tiktokProvider);
+const vimeoCategory = category(vimeo, vimeoProvider);
+const youtubeCategory = category(youtube, youtubeProvider);
 
-console.log("artgridCategory: ", artgridCategory)
-console.log("artlistCategory: ", artlistCategory)
-console.log("contentbibleCategory: ", contentbibleCategory)
-console.log("instagramCategory: ", instagramCategory)
-console.log("newsflareCategory: ", newsflareCategory)
-console.log("pexelsCategory: ", pexelsCategory)
-console.log("storyblocksCategory: ", storyblocksCategory)
-console.log("tiktokCategory: ", tiktokCategory)
-console.log("vimeoCategory: ", vimeoCategory)
-console.log("youtubeCategory: ", youtubeCategory)
+console.log("artgridCategory: ", artgridCategory);
+console.log("artlistCategory: ", artlistCategory);
+console.log("contentbibleCategory: ", contentbibleCategory);
+console.log("instagramCategory: ", instagramCategory);
+console.log("newsflareCategory: ", newsflareCategory);
+console.log("pexelsCategory: ", pexelsCategory);
+console.log("storyblocksCategory: ", storyblocksCategory);
+console.log("tiktokCategory: ", tiktokCategory);
+console.log("vimeoCategory: ", vimeoCategory);
+console.log("youtubeCategory: ", youtubeCategory);
 
-console.log("")
+console.log("");
 
 //TRACK TESTS
-console.log("TRACK TESTS")
+console.log("TRACK TESTS");
 
-const artgridTrack = track(artgrid, artgridProvider, artgridCategory)
-const artlistTrack = track(artlist, artlistProvider, artlistCategory)
-const contentbibleTrack = track(contentbible, contentbibleProvider, contentbibleCategory)
-const instagramTrack = track(instagram, instagramProvider, instagramCategory)
-const newsflareTrack = track(newsflare, newsflareProvider, newsflareCategory)
-const pexelsTrack = track(pexels, pexelsProvider, pexelsCategory)
-const storyblockTrack = track(storyblocks, storyblocksProvider, storyblocksCategory)
-const tiktokTrack = track(tiktok, tiktokProvider, tiktokCategory)
-const vimeoTrack = track(vimeo, vimeoProvider, vimeoCategory)
-const youtubeTrack = track(youtube, youtubeProvider, youtubeCategory)
+const artgridTrack = track(artgrid, artgridProvider, artgridCategory);
+const artlistTrack = track(artlist, artlistProvider, artlistCategory);
+const contentbibleTrack = track(contentbible, contentbibleProvider, contentbibleCategory);
+const instagramTrack = track(instagram, instagramProvider, instagramCategory);
+const newsflareTrack = track(newsflare, newsflareProvider, newsflareCategory);
+const pexelsTrack = track(pexels, pexelsProvider, pexelsCategory);
+const storyblockTrack = track(storyblocks, storyblocksProvider, storyblocksCategory);
+const tiktokTrack = track(tiktok, tiktokProvider, tiktokCategory);
+const vimeoTrack = track(vimeo, vimeoProvider, vimeoCategory);
+const youtubeTrack = track(youtube, youtubeProvider, youtubeCategory);
 
-console.log("artgridTrack: ", artgridTrack)
-console.log("contentbibleTrack: ", contentbibleTrack)
-console.log("instagramTrack: ", instagramTrack)
-console.log("newsflareTrack: ", newsflareTrack)
-console.log("pexelsTrack: ", pexelsTrack)
-console.log("storyblockTrack: ", storyblockTrack)
-console.log("tiktokTrack: ", tiktokTrack)
-console.log("vimeoTrack: ", vimeoTrack)
-console.log("youtubeTrack: ", youtubeTrack)
+console.log("artgridTrack: ", artgridTrack);
+console.log("contentbibleTrack: ", contentbibleTrack);
+console.log("instagramTrack: ", instagramTrack);
+console.log("newsflareTrack: ", newsflareTrack);
+console.log("pexelsTrack: ", pexelsTrack);
+console.log("storyblockTrack: ", storyblockTrack);
+console.log("tiktokTrack: ", tiktokTrack);
+console.log("vimeoTrack: ", vimeoTrack);
+console.log("youtubeTrack: ", youtubeTrack);
 
-console.log("")
-console.log(provider("AFV - These Kids Are a Mess.mp4"))
+// Test anything as needed here by un-commenting lines:
+//console.log("");
+//console.log();
+//console.log(provider("(FailArmy)_Super Soft & Fluffy Cinnamon Rolls Recipe_k8x_s98P4xY_YT.mp4"));
+//console.log(category());
 
 //END OF TESTS
-console.log("")
-console.log("END OF TESTS")
+console.log("");
+console.log("END OF TESTS");
+console.log("");
+
+*/
