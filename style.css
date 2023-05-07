@@ -67,7 +67,46 @@ html {
     padding: 0.5rem;
     border-radius: 0.5rem;
     border: none;
-    margin-top: 0.6rem;
+    margin-top: 2rem;
+    margin-bottom: 0.5rem;
+    margin-left: 0.5rem;
+    font-family: Montserrat;
+    color: #00122e;
+    font-size: 1rem;
+  }
+
+  select {
+    padding: 0.5rem;
+    border-radius: 0.5rem;
+    border: none;
+    margin-bottom: .5rem;
+    margin-left: 0.5rem;
+    font-family: Montserrat;
+    color: #00122e;
+    font-size: 1rem;
+    appearance: none;
+  }
+  
+  select::-ms-expand {
+    display: none; /* hide the down arrow in Internet Explorer */
+  }
+  
+  select::-webkit-scrollbar {
+    width: 6px; /* adjust scrollbar width as needed */
+  }
+  
+  select::-webkit-scrollbar-thumb {
+    background-color: #ccc; /* adjust scrollbar color as needed */
+  }
+  
+  select option {
+    padding-right: 1rem; /* create space between option text and down arrow */
+  }
+
+  input[type="date"] {
+    padding: 0.5rem;
+    border-radius: 0.5rem;
+    border: none;
     margin-bottom: 1rem;
     margin-left: 0.5rem;
     font-family: Montserrat;
@@ -87,6 +126,7 @@ html {
     cursor: pointer;
     margin-left: auto;
     margin-right: auto;
+    margin-top: 1.5rem;
   }
 
   #downloaded-text {
@@ -97,9 +137,22 @@ html {
     font-weight: 500;
   }
   
-  /* This is the default file upload that I'm trying to hide */
+  /* This is the default file upload button and text that I'm trying to hide */
   input[type="file"] {
     display: none;
+  }
+
+  footer {
+    padding: 1rem;
+    text-align: center;
+    position: absolute;
+    right: 0rem;
+    bottom: 0;
+    width: 100%;
+    font-family: Montserrat;
+    color: #003762;
+    font-size: 1rem;
+    font-weight: 500;
   }
   
   /* style the error and output messages */
